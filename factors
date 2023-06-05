@@ -1,26 +1,46 @@
 #!/usr/bin/python3
 import sys
+import math
+import signal
+
+# Function to handle the timeout
+def timeout_handler(signum, frame):
+    raise TimeoutError("Program execution timed out")
+
+# Set the signal handler for the timeout
+signal.signal(signal.SIGALRM, timeout_handler)
+signal.alarm(5)  # 5 seconds timeout
 
 def factorize(number):
     factors = []
-    for i in range(2, number // 2 + 1):
-        if number % i == 0:
-            factors.append((i, number // i))
+    for i in range(2, int(math.sqrt(number)) + 1):
+        while number % i == 0:
+            factors.append(i)
+            number //= i
+    if number > 1:
+        factors.append(number)
     return factors
 
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: factors <file>")
-        return
+if len(sys.argv) < 2:
+    print("Usage: python factorize.py <file>")
+    sys.exit(1)
 
-    filename = sys.argv[1]
+file_path = sys.argv[1]
 
-    with open(filename, 'r') as file:
+try:
+    with open(file_path, 'r') as file:
         for line in file:
             number = int(line.strip())
-            factor_pairs = factorize(number)
-            for pair in factor_pairs:
-                print(f"{number}={pair[0]}*{pair[1]}")
+            factors = factorize(number)
+            if len(factors) >= 2:
+                p = factors[0]
+                q = 1
+                for factor in factors[1:]:
+                    q *= factor
+                print(f"{number} = {p} * {q}")
+except TimeoutError:
+    print("Program execution timed out")
+    sys.exit(1)
+finally:
+    signal.alarm(0)  # Cancel the alarm
 
-if __name__ == "__main__":
-    main()
