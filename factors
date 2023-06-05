@@ -22,7 +22,7 @@ def factorize(number):
     return factors
 
 if len(sys.argv) < 2:
-    print("Usage: python factorize.py <file>")
+    print("Usage: factors <file>")
     sys.exit(1)
 
 file_path = sys.argv[1]
